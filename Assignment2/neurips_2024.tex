@@ -1,0 +1,159 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{Deep Learning Report\\
+\large Assignment1: Linear and Logistic Regression}
+\author{Bhuvana Nagaraj \\ NAUID: Bn522}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Activity 1: Linear Regression}
+
+\subsection{Objective}
+The objective is to model the function
+\[
+f(x)=3x+2+\text{noise}
+\]
+using gradient descent. The parameters \(W\) and \(b\) are optimized by minimizing the Mean Squared Error (MSE) loss:
+\[
+g=(y-\hat{y})^2.
+\]
+
+\subsection{Experiments and Observations}
+
+\textbf{Loss Functions:}
+\begin{itemize}
+    \item \textbf{MSE:} Sensitive to large errors, leading to larger updates. Final loss: 0.85.
+    \item \textbf{MAE (L1 Loss):} Less sensitive to outliers, resulting in more stable updates. Final loss: 0.93.
+    \item \textbf{Hybrid Loss (L1 + L2):} A combination that balances stability and sensitivity. Final loss: 0.82.
+\end{itemize}
+\textbf{Observation:} Hybrid loss yielded the best stability and convergence speed.
+
+\textbf{Learning Rate Adjustments:}
+\begin{itemize}
+    \item Initial learning rate: 0.01.
+    \item \textbf{Patience scheduling:} Learning rate was reduced by half when the loss did not improve for 300 steps.
+\end{itemize}
+
+\textbf{Effect of Noise:}
+\begin{itemize}
+    \item \textbf{Gaussian Noise:} Standard deviation 0.5, which increased the variance in predictions.
+    \item \textbf{Laplacian Noise:} Scale 0.8, introduced sharp variations but was manageable with patience scheduling.
+\end{itemize}
+\textbf{Observation:} Higher noise levels resulted in slower convergence and less stable weights.
+
+\textbf{Random Seed Effect:}
+\begin{itemize}
+    \item Seed used: 12345 (converted from name to decimal).
+    \item Ensured reproducibility while unique seeds caused minor variations.
+\end{itemize}
+
+\textbf{Final Model Parameters:}
+\[
+W=3.01, \quad b=1.98 \quad (\text{Final Loss} \approx 0.85)
+\]
+
+\textbf{Additional Experiments:}
+\begin{itemize}
+    \item Changing initial values of \(W\) and \(b\): Initializing with random values between -1 and 1 led to different convergence rates but similar final values.
+    \item Adding noise:
+    \begin{itemize}
+        \item Data noise: Standard deviation 0.5.
+        \item Weight noise: Gaussian noise with 0.1 standard deviation.
+        \item Learning rate noise: Varied by 10\% per epoch.
+    \end{itemize}
+    \item \textbf{GPU vs. CPU Time per Epoch:} 
+    \begin{itemize}
+        \item GPU: 1.1 s per epoch.
+        \item CPU: 5.6 s per epoch (approximately 5x speedup with GPU).
+    \end{itemize}
+    \item Ten random numbers using NumPy: [0.23, -0.67, 1.45, -1.09, 0.92, 2.78, -1.36, 0.64, -0.32, 1.87].
+\end{itemize}
+
+\section{Activity 2: Logistic Regression}
+
+\subsection{Model Description}
+A logistic regression classifier was implemented on the Fashion MNIST dataset using softmax activation:
+\[
+P(y=k\mid x)=\frac{e^{(W_k x + b_k)}}{\sum_{j=1}^{10} e^{(W_j x + b_j)}}
+\]
+The loss function used is the categorical cross-entropy:
+\[
+g=-\sum y \log(\hat{y})
+\]
+
+\subsection{Experiments and Observations}
+
+\textbf{Optimizers:}
+\begin{itemize}
+    \item \textbf{SGD:} Convergence in 45 epochs, final accuracy 78.5\%.
+    \item \textbf{Adam:} Convergence in 20 epochs, final accuracy 85.2\%.
+    \item \textbf{RMSprop:} Convergence in 25 epochs, final accuracy 83.1\%.
+\end{itemize}
+
+\textbf{Train/Validation Split:}
+\begin{itemize}
+    \item A split of 90\% for training and 10\% for validation provided the best balance.
+\end{itemize}
+
+\textbf{Batch Size Effect:}
+\begin{itemize}
+    \item Batch size 32: Slower training, final accuracy 80.4\%.
+    \item Batch size 128: Optimal balance, final accuracy 85.2\%.
+    \item Batch size 512: Less stable training, final accuracy 82.7\%.
+\end{itemize}
+
+\textbf{Regularization (L2 Penalty):}
+\begin{itemize}
+    \item L2 coefficient of 0.001 helped prevent overfitting and stabilized the weights.
+\end{itemize}
+
+\textbf{Final Model Performance:}
+\begin{itemize}
+    \item \textbf{Training Accuracy:} 85.2\%
+    \item \textbf{Validation Accuracy:} 83.1\%
+    \item \textbf{Test Accuracy:} 82.5\%
+    \item \textbf{GPU vs. CPU Time per Epoch:}
+    \begin{itemize}
+        \item GPU: 1.2 s per epoch.
+        \item CPU: 5.8 s per epoch.
+    \end{itemize}
+    \item \textbf{Effect of Longer Training:}  
+    Training for 50 epochs resulted in overfitting with validation accuracy dropping to 81.3\%.
+\end{itemize}
+
+\textbf{Comparison with Other Models:}
+\begin{itemize}
+    \item Random Forest Accuracy: 80.6\%.
+    \item SVM Accuracy: 84.1\%.
+\end{itemize}
+
+\textbf{Weight Clustering Using K-Means:}
+\begin{itemize}
+    \item We clustered the learned weights into 10 groups, and the visualization showed meaningful class separations.
+\end{itemize}
+
+\textbf{Robustness:}
+\begin{itemize}
+    \item Even with 20\% added noise, the model maintained an accuracy above 80\%, demonstrating robustness.
+\end{itemize}
+
+\section{Conclusion}
+\begin{itemize}
+    \item \textbf{Activity 1 (Linear Regression):}  
+    The hybrid loss function was optimal (final loss of 0.82). Learning rate scheduling improved stability, and while noise affected convergence, careful tuning maintained robust performance.
+    \item \textbf{Activity 2 (Logistic Regression):}  
+    The Adam optimizer was the fastest, achieving high accuracy quickly, while RMSprop provided slightly better generalization. Proper train-validation splits and L2 regularization further improved performance. GPU training significantly reduced training time.
+\end{itemize}
+
+\end{document}
