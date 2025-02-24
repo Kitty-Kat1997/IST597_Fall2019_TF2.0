@@ -1,46 +1,48 @@
-"""
-author:-aam35
-"""
-import time
-
 import tensorflow as tf
-import tensorflow.contrib.eager as tfe
+import numpy as np
 import matplotlib.pyplot as plt
 
-tfe.enable_eager_execution()
 
-# Create data
-NUM_EXAMPLES = 500
+seed = 1234  
+np.random.seed(seed)
+tf.random.set_seed(seed)
 
-#define inputs and outputs with some noise 
-X = tf.random_normal([NUM_EXAMPLES])  #inputs 
-noise = tf.random_normal([NUM_EXAMPLES]) #noise 
-y = X * 3 + 2 + noise  #true output
-
-# Create variables.
-W = None
-b = None
+X = np.random.rand(10000, 1).astype(np.float32)
+y_true = 3 * X + 2 + np.random.normal(0, 0.1, (10000, 1))  # Adding noise
 
 
-train_steps = 1000
-learning_rate = 0.001
+W = tf.Variable(tf.random.normal([1, 1]))
+b = tf.Variable(tf.random.normal([1]))
 
-# Define the linear predictor.
-def prediction(x):
-  return None
 
-# Define loss functions of the form: L(y, y_predicted)
-def squared_loss(y, y_predicted):
-  return None
+def mse_loss(y_true, y_pred):
+    return tf.reduce_mean(tf.square(y_true - y_pred))
 
-def huber_loss(y, y_predicted, m=1.0):
-  """Huber loss."""
-  return None
 
-for i in range(train_steps):
-  ###TO DO ## Calculate gradients
-plt.plot(X, y, 'bo',label='org')
-plt.plot(X, y * W.numpy() + b.numpy(), 'r',
-         label="huber regression")
+def hybrid_loss(y_true, y_pred):
+    return tf.reduce_mean(tf.abs(y_true - y_pred) + tf.square(y_true - y_pred))
+
+learning_rate = 0.1
+decay_factor = 0.5
+optimizer = tf.optimizers.SGD(learning_rate)
+
+
+for epoch in range(1000):
+    with tf.GradientTape() as tape:
+        y_pred = tf.matmul(X, W) + b
+        loss = hybrid_loss(y_true, y_pred)
+    gradients = tape.gradient(loss, [W, b])
+    optimizer.apply_gradients(zip(gradients, [W, b]))
+    
+    if epoch % 100 == 0:
+        print(f"Epoch {epoch}: Loss = {loss.numpy()}")
+        
+    
+    if epoch > 0 and epoch % 200 == 0:
+        optimizer.learning_rate.assign(optimizer.learning_rate * decay_factor)
+
+
+plt.scatter(X, y_true, label='True Data')
+plt.plot(X, tf.matmul(X, W) + b, color='red', label='Predictions')
 plt.legend()
-plt.show
+plt.show()
